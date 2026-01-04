@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BookingController.class)
-class BookingControllerTest {
+public class BookingControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -29,7 +29,7 @@ class BookingControllerTest {
     private BookingService bookingService;
 
     @Test
-    void createBooking_ValidRequest_ReturnsOk() throws Exception {
+    public void createBooking_ValidRequest_ReturnsOk() throws Exception {
         BookingDto bookingDto = BookingDto.builder()
                 .id(1L)
                 .start(LocalDateTime.now().plusDays(1))
@@ -49,7 +49,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void approveBooking_ValidRequest_ReturnsOk() throws Exception {
+    public void approveBooking_ValidRequest_ReturnsOk() throws Exception {
         BookingDto bookingDto = new BookingDto();
 
         when(bookingService.approveBooking(anyLong(), anyBoolean(), anyLong())).thenReturn(bookingDto);
@@ -61,7 +61,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void getBooking_ValidRequest_ReturnsOk() throws Exception {
+    public void getBooking_ValidRequest_ReturnsOk() throws Exception {
         BookingDto bookingDto = new BookingDto();
 
         when(bookingService.getBooking(anyLong(), anyLong())).thenReturn(bookingDto);
@@ -72,7 +72,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void getAllBookings_ValidRequest_ReturnsOk() throws Exception {
+    public void getAllBookings_ValidRequest_ReturnsOk() throws Exception {
         mockMvc.perform(get("/bookings")
                         .header("X-Sharer-User-Id", 1L)
                         .param("state", "ALL"))
@@ -80,7 +80,7 @@ class BookingControllerTest {
     }
 
     @Test
-    void getOwnerBookings_ValidRequest_ReturnsOk() throws Exception {
+    public void getOwnerBookings_ValidRequest_ReturnsOk() throws Exception {
         mockMvc.perform(get("/bookings/owner")
                         .header("X-Sharer-User-Id", 1L)
                         .param("state", "ALL"))

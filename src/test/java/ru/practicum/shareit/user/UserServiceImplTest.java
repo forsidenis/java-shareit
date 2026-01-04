@@ -18,7 +18,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+public class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -30,7 +30,7 @@ class UserServiceImplTest {
     private UserDto userDto;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         user = User.builder()
                 .id(1L)
                 .name("Test User")
@@ -45,7 +45,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void createUser_DuplicateEmail_ThrowsConflictException() {
+    public void createUser_DuplicateEmail_ThrowsConflictException() {
         when(userRepository.existsByEmail(anyString())).thenReturn(true);
 
         assertThrows(ResponseStatusException.class, () -> userService.createUser(userDto));
@@ -54,7 +54,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void createUser_ValidUser_ReturnsUserDto() {
+    public void createUser_ValidUser_ReturnsUserDto() {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
@@ -67,7 +67,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void updateUser_EmptyName_UpdatesSuccessfully() {
+    public void updateUser_EmptyName_UpdatesSuccessfully() {
         UserDto updateDto = UserDto.builder()
                 .name("")  // Пустое имя
                 .email("new@example.com")
@@ -88,7 +88,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void updateUser_OnlySpacesInName_NameNotUpdated() {
+    public void updateUser_OnlySpacesInName_NameNotUpdated() {
         UserDto updateDto = UserDto.builder()
                 .name("   ")  // Только пробелы
                 .build();
@@ -105,7 +105,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void updateUser_ValidName_UpdatesSuccessfully() {
+    public void updateUser_ValidName_UpdatesSuccessfully() {
         UserDto updateDto = UserDto.builder()
                 .name("New Name")  // Новое имя
                 .build();
@@ -121,7 +121,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void updateUser_DuplicateEmail_ThrowsConflictException() {
+    public void updateUser_DuplicateEmail_ThrowsConflictException() {
         UserDto updateDto = UserDto.builder()
                 .email("existing@example.com")
                 .build();
@@ -134,14 +134,14 @@ class UserServiceImplTest {
     }
 
     @Test
-    void getUserById_UserNotFound_ThrowsNotFoundException() {
+    public void getUserById_UserNotFound_ThrowsNotFoundException() {
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> userService.getUserById(999L));
     }
 
     @Test
-    void updateUser_InvalidEmailFormat_ThrowsBadRequest() {
+    public void updateUser_InvalidEmailFormat_ThrowsBadRequest() {
         UserDto updateDto = UserDto.builder()
                 .email("invalid-email")  // Нет @
                 .build();

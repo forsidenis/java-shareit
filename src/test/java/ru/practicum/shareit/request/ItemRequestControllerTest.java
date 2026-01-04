@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ItemRequestController.class)
-class ItemRequestControllerTest {
+public class ItemRequestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -27,7 +27,7 @@ class ItemRequestControllerTest {
     private ItemRequestService itemRequestService;
 
     @Test
-    void createRequest_ValidRequest_ReturnsCreated() throws Exception {
+    public void createRequest_ValidRequest_ReturnsCreated() throws Exception {
         ItemRequestDto itemRequestDto = ItemRequestDto.builder()
                 .id(1L)
                 .description("Need a drill")
@@ -43,21 +43,21 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void getUserRequests_ValidRequest_ReturnsOk() throws Exception {
+    public void getUserRequests_ValidRequest_ReturnsOk() throws Exception {
         mockMvc.perform(get("/requests")
                         .header("X-Sharer-User-Id", 1L))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void getAllRequests_ValidRequest_ReturnsOk() throws Exception {
+    public void getAllRequests_ValidRequest_ReturnsOk() throws Exception {
         mockMvc.perform(get("/requests/all")
                         .header("X-Sharer-User-Id", 1L))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void getRequestById_ValidRequest_ReturnsOk() throws Exception {
+    public void getRequestById_ValidRequest_ReturnsOk() throws Exception {
         ItemRequestDto itemRequestDto = new ItemRequestDto();
 
         when(itemRequestService.getRequestById(anyLong(), anyLong())).thenReturn(itemRequestDto);

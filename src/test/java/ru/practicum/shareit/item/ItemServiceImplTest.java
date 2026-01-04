@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ItemServiceImplTest {
+public class ItemServiceImplTest {
 
     @Mock
     private ItemRepository itemRepository;
@@ -40,7 +40,7 @@ class ItemServiceImplTest {
     private UserDto userDto;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         owner = User.builder()
                 .id(1L)
                 .name("Owner")
@@ -78,7 +78,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_ValidUpdate_ReturnsUpdatedItemDto() {
+    public void updateItem_ValidUpdate_ReturnsUpdatedItemDto() {
         ItemDto updateDto = ItemDto.builder()
                 .name("Updated Name")
                 .description("Updated Description")
@@ -96,7 +96,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void updateItem_WrongOwner_ThrowsNotFoundException() {
+    public void updateItem_WrongOwner_ThrowsNotFoundException() {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         assertThrows(NotFoundException.class, () ->
@@ -104,7 +104,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void getItemById_ItemExists_ReturnsItemDto() {
+    public void getItemById_ItemExists_ReturnsItemDto() {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         ItemResponseDto result = itemService.getItemById(1L);
@@ -114,7 +114,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void getAllItemsByOwner_ReturnsOwnerItems() {
+    public void getAllItemsByOwner_ReturnsOwnerItems() {
         when(itemRepository.findByOwner(1L)).thenReturn(List.of(item));
 
         List<ItemResponseDto> result = itemService.getAllItems(1L);
@@ -124,7 +124,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void searchItems_WithMatchingText_ReturnsItems() {
+    public void searchItems_WithMatchingText_ReturnsItems() {
         when(itemRepository.search("test")).thenReturn(List.of(item));
 
         List<ItemResponseDto> result = itemService.searchItems("test", 1L);
@@ -133,7 +133,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void searchItems_EmptyText_ReturnsEmptyList() {
+    public void searchItems_EmptyText_ReturnsEmptyList() {
         List<ItemResponseDto> result = itemService.searchItems("", 1L);
 
         assertTrue(result.isEmpty());

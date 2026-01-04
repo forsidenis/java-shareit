@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ItemController.class)
-class ItemControllerTest {
+public class ItemControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -34,7 +34,7 @@ class ItemControllerTest {
     private ItemResponseDto itemResponseDto;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         itemDto = ItemDto.builder()
                 .id(1L)
                 .name("Test Item")
@@ -52,7 +52,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void createItem_EmptyName_ReturnsBadRequest() throws Exception {
+    public void createItem_EmptyName_ReturnsBadRequest() throws Exception {
         ItemDto invalidItem = ItemDto.builder()
                 .name("")
                 .description("Test Description")
@@ -67,7 +67,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void updateItem_EmptyName_ReturnsBadRequest() throws Exception {
+    public void updateItem_EmptyName_ReturnsBadRequest() throws Exception {
         ItemDto invalidItem = ItemDto.builder()
                 .name("")
                 .build();
@@ -80,7 +80,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void searchItems_EmptyText_ReturnsEmptyList() throws Exception {
+    public void searchItems_EmptyText_ReturnsEmptyList() throws Exception {
         when(itemService.searchItems(anyString(), anyLong())).thenReturn(List.of());
 
         mockMvc.perform(get("/items/search")
@@ -92,7 +92,7 @@ class ItemControllerTest {
     }
 
     @Test
-    void searchItems_NullText_ReturnsEmptyList() throws Exception {
+    public void searchItems_NullText_ReturnsEmptyList() throws Exception {
         when(itemService.searchItems(anyString(), anyLong())).thenReturn(List.of());
 
         mockMvc.perform(get("/items/search")

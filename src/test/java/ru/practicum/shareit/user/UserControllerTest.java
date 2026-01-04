@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
-class UserControllerTest {
+public class UserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,7 +32,7 @@ class UserControllerTest {
     private UserDto userDto;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         userDto = UserDto.builder()
                 .id(1L)
                 .name("Test User")
@@ -41,7 +41,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser_ValidRequest_ReturnsCreated() throws Exception {
+    public void createUser_ValidRequest_ReturnsCreated() throws Exception {
         when(userService.createUser(any(UserDto.class))).thenReturn(userDto);
 
         mockMvc.perform(post("/users")
@@ -54,7 +54,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser_EmptyEmail_ReturnsBadRequest() throws Exception {
+    public void createUser_EmptyEmail_ReturnsBadRequest() throws Exception {
         UserDto invalidUser = UserDto.builder()
                 .name("Test User")
                 .email("")
@@ -67,7 +67,7 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser_InvalidEmail_ReturnsBadRequest() throws Exception {
+    public void createUser_InvalidEmail_ReturnsBadRequest() throws Exception {
         UserDto invalidUser = UserDto.builder()
                 .name("Test User")
                 .email("invalid-email")
@@ -80,7 +80,7 @@ class UserControllerTest {
     }
 
     @Test
-    void updateUser_ValidRequest_ReturnsOk() throws Exception {
+    public void updateUser_ValidRequest_ReturnsOk() throws Exception {
         when(userService.updateUser(anyLong(), any(UserDto.class))).thenReturn(userDto);
 
         mockMvc.perform(patch("/users/1")
@@ -90,7 +90,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getUser_ValidRequest_ReturnsOk() throws Exception {
+    public void getUser_ValidRequest_ReturnsOk() throws Exception {
         when(userService.getUserById(1L)).thenReturn(userDto);
 
         mockMvc.perform(get("/users/1"))
@@ -99,7 +99,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getAllUsers_ReturnsOk() throws Exception {
+    public void getAllUsers_ReturnsOk() throws Exception {
         when(userService.getAllUsers()).thenReturn(List.of(userDto));
 
         mockMvc.perform(get("/users"))
@@ -108,7 +108,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUser_ReturnsNoContent() throws Exception {
+    public void deleteUser_ReturnsNoContent() throws Exception {
         mockMvc.perform(delete("/users/1"))
                 .andExpect(status().isNoContent());
     }
