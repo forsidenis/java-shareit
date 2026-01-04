@@ -49,7 +49,7 @@ public class ItemServiceImpl implements ItemService {
             item.setAvailable(itemDto.getAvailable());
         }
 
-        Item updatedItem = itemRepository.update(item); // Исправлено на update
+        Item updatedItem = itemRepository.update(item);
         return ItemMapper.toResponseDto(updatedItem);
     }
 

@@ -28,7 +28,7 @@ public class InMemoryBookingRepository implements BookingRepository {
     public List<Booking> findByBookerId(Long bookerId) {
         return bookings.values().stream()
                 .filter(booking -> booking.getBookerId() != null &&
-                        booking.getBookerId().equals(bookerId))  // Исправлено: getBookerId()
+                        booking.getBookerId().equals(bookerId))
                 .collect(Collectors.toList());
     }
 
@@ -36,13 +36,14 @@ public class InMemoryBookingRepository implements BookingRepository {
     public List<Booking> findByItemId(Long itemId) {
         return bookings.values().stream()
                 .filter(booking -> booking.getItemId() != null &&
-                        booking.getItemId().equals(itemId))  // Исправлено: getItemId()
+                        booking.getItemId().equals(itemId))
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<Booking> findByOwnerId(Long ownerId) {
-
+        // В реальной реализации здесь должна быть логика поиска по владельцу через itemId
+        // Временно возвращаем все бронирования
         return new ArrayList<>(bookings.values());
     }
 

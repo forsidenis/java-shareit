@@ -19,8 +19,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        // Валидация
-        validateUserDto(userDto);
+        // Валидация для создания
+        validateUserForCreate(userDto);
+
+        // Проверка уникальности email при создании
+        if (userRepository.existsByEmail(userDto.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email уже используется");
+        }
 
         User user = UserMapper.toEntity(userDto);
         try {
@@ -36,18 +41,25 @@ public class UserServiceImpl implements UserService {
         User existingUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
 
-        // Обновляем поля (при обновлении пустые поля игнорируем)
-        if (userDto.getName() != null && !userDto.getName().isBlank()) {
-            existingUser.setName(userDto.getName());
+        // Обновляем только переданные непустые поля
+        if (userDto.getName() != null && !userDto.getName().trim().isEmpty()) {
+            existingUser.setName(userDto.getName().trim());
         }
 
-        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
+        if (userDto.getEmail() != null && !userDto.getEmail().trim().isEmpty()) {
+            String newEmail = userDto.getEmail().trim();
+
+            // Проверяем формат email
+            if (!newEmail.contains("@")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Некорректный формат email");
+            }
+
             // Проверяем, что email не занят другим пользователем
-            if (userRepository.existsByEmailAndIdNot(userDto.getEmail(), userId)) {
+            if (userRepository.existsByEmailAndIdNot(newEmail, userId)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT,
                         "Email уже используется другим пользователем");
             }
-            existingUser.setEmail(userDto.getEmail());
+            existingUser.setEmail(newEmail);
         }
 
         try {
@@ -80,11 +92,11 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
-    private void validateUserDto(UserDto userDto) {
-        if (userDto.getName() == null || userDto.getName().isBlank()) {
+    private void validateUserForCreate(UserDto userDto) {
+        if (userDto.getName() == null || userDto.getName().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Имя не может быть пустым");
         }
-        if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
+        if (userDto.getEmail() == null || userDto.getEmail().trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email не может быть пустым");
         }
         if (!userDto.getEmail().contains("@")) {

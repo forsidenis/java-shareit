@@ -24,7 +24,7 @@ public class UserController {
     public ResponseEntity<UserDto> updateUser(
             @PathVariable Long userId,
             @RequestBody UserDto userDto) {
-        // Для PATCH запросов валидация не обязательна
+
         return ResponseEntity.ok(userService.updateUser(userId, userDto));
     }
 

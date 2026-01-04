@@ -13,16 +13,18 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public User save(User user) {
         if (user.getId() == null) {
-            // Проверка уникальности email при создании
+            // При создании: проверяем уникальность email
             if (existsByEmail(user.getEmail())) {
                 throw new IllegalStateException("Email уже используется");
             }
             user.setId(idCounter++);
         } else {
-            // При обновлении проверяем, что email не используется другим пользователем
+            // При обновлении: проверяем уникальность email, кроме текущего пользователя
             User existingUser = users.get(user.getId());
-            if (existingUser != null && !existingUser.getEmail().equalsIgnoreCase(user.getEmail())) {
-                if (existsByEmail(user.getEmail())) {
+            if (existingUser != null) {
+                // Если email меняется и уже используется другим пользователем
+                if (!existingUser.getEmail().equals(user.getEmail()) &&
+                        existsByEmailAndIdNot(user.getEmail(), user.getId())) {
                     throw new IllegalStateException("Email уже используется другим пользователем");
                 }
             }

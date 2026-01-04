@@ -20,6 +20,17 @@ public class ItemController {
     public ResponseEntity<ItemResponseDto> createItem(
             @Valid @RequestBody ItemDto itemDto,
             @RequestHeader("X-Sharer-User-Id") Long userId) {
+        // Явная валидация для createItem
+        if (itemDto.getName() == null || itemDto.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Название не может быть пустым");
+        }
+        if (itemDto.getDescription() == null || itemDto.getDescription().trim().isEmpty()) {
+            throw new IllegalArgumentException("Описание не может быть пустым");
+        }
+        if (itemDto.getAvailable() == null) {
+            throw new IllegalArgumentException("Статус доступности не может быть null");
+        }
+
         ItemResponseDto createdItem = itemService.createItem(itemDto, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
     }

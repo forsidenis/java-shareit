@@ -2,6 +2,7 @@ package ru.practicum.shareit.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -9,23 +10,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import jakarta.validation.ConstraintViolationException;
+
+import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
 
-    @ExceptionHandler(NoSuchElementException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(NoSuchElementException e) {
-        log.error("Not found exception: {}", e.getMessage());
-        return Map.of("error", "Объект не найден: " + e.getMessage());
-    }
-
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleCustomNotFoundException(NotFoundException e) {
+    public Map<String, String> handleNotFoundException(NotFoundException e) {
         log.error("Not found exception: {}", e.getMessage());
         return Map.of("error", e.getMessage());
     }
@@ -45,9 +40,11 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public Map<String, String> handleResponseStatusException(ResponseStatusException e) {
+    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException e) {
         log.error("Response status exception: {} - {}", e.getStatusCode(), e.getReason());
-        return Map.of("error", e.getReason() != null ? e.getReason() : e.getStatusCode().toString());
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getReason() != null ? e.getReason() : e.getStatusCode().toString());
+        return ResponseEntity.status(e.getStatusCode()).body(errorResponse);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
