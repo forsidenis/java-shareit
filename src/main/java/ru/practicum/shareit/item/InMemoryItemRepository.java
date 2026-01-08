@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
@@ -35,10 +36,7 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public List<Item> search(String text) {
-        if (text == null || text.isBlank()) {
-            return Collections.emptyList();
-        }
-
+        // Проверка на пустой текст вынесена в сервис
         String lowerText = text.toLowerCase();
         return items.values().stream()
                 .filter(item -> Boolean.TRUE.equals(item.getAvailable()))
@@ -57,7 +55,7 @@ public class InMemoryItemRepository implements ItemRepository {
     @Override
     public Item update(Item item) {
         if (item.getId() == null || !items.containsKey(item.getId())) {
-            throw new NoSuchElementException("Item not found");
+            throw new NotFoundException("Item not found");
         }
         items.put(item.getId(), item);
         return item;

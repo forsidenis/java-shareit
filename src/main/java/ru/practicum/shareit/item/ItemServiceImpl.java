@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
@@ -23,46 +24,33 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemResponseDto createItem(ItemDto itemDto, Long userId) {
         User owner = getUserById(userId);
-        Item item = ItemMapper.toEntity(itemDto);
-        item.setOwner(owner);
+        Item item = ItemMapper.toEntity(itemDto, owner);
         Item savedItem = itemRepository.save(item);
         return ItemMapper.toResponseDto(savedItem);
     }
 
     @Override
-    public ItemResponseDto updateItem(Long itemId, ItemDto itemDto, Long userId) {
+    public ItemResponseDto updateItem(Long itemId, ItemUpdateDto itemUpdateDto, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь с ID " + itemId + " не найдена"));
 
+        // Проверяем, что пользователь является владельцем
         if (!item.getOwner().getId().equals(userId)) {
             throw new NotFoundException("Вещь с ID " + itemId + " не найдена у пользователя с ID " + userId);
         }
 
-        // Обновляем только не-null поля
-        if (itemDto.getName() != null) {
-            item.setName(itemDto.getName());
-        }
-        if (itemDto.getDescription() != null) {
-            item.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
-        }
+        // Обновляем поля
+        ItemMapper.updateEntity(item, itemUpdateDto);
 
         Item updatedItem = itemRepository.update(item);
         return ItemMapper.toResponseDto(updatedItem);
     }
 
     @Override
-    public ItemResponseDto getItemById(Long itemId) {
+    public ItemResponseDto getItemById(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Вещь с ID " + itemId + " не найдена"));
         return ItemMapper.toResponseDto(item);
-    }
-
-    @Override
-    public ItemResponseDto getItemById(Long itemId, Long userId) {
-        return getItemById(itemId);
     }
 
     @Override
@@ -77,7 +65,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemResponseDto> searchItems(String text, Long userId) {
         getUserById(userId); // Проверяем пользователя
 
-        if (text == null || text.trim().isEmpty()) {
+        if (text == null || text.isBlank()) {
             return List.of();
         }
 

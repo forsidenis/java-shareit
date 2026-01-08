@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -36,6 +37,7 @@ public class ItemServiceImplTest {
     private User owner;
     private Item item;
     private ItemDto itemDto;
+    private ItemUpdateDto itemUpdateDto;
     private ItemResponseDto itemResponseDto;
     private UserDto userDto;
 
@@ -68,6 +70,12 @@ public class ItemServiceImplTest {
                 .available(true)
                 .build();
 
+        itemUpdateDto = ItemUpdateDto.builder()
+                .name("Updated Name")
+                .description("Updated Description")
+                .available(false)
+                .build();
+
         itemResponseDto = ItemResponseDto.builder()
                 .id(1L)
                 .name("Test Item")
@@ -79,16 +87,10 @@ public class ItemServiceImplTest {
 
     @Test
     public void updateItem_ValidUpdate_ReturnsUpdatedItemDto() {
-        ItemDto updateDto = ItemDto.builder()
-                .name("Updated Name")
-                .description("Updated Description")
-                .available(false)
-                .build();
-
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(itemRepository.update(any(Item.class))).thenReturn(item);
 
-        ItemResponseDto result = itemService.updateItem(1L, updateDto, 1L);
+        ItemResponseDto result = itemService.updateItem(1L, itemUpdateDto, 1L);
 
         assertNotNull(result);
         assertEquals(item.getId(), result.getId());
@@ -100,14 +102,14 @@ public class ItemServiceImplTest {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
         assertThrows(NotFoundException.class, () ->
-                itemService.updateItem(1L, itemDto, 2L));
+                itemService.updateItem(1L, itemUpdateDto, 2L));
     }
 
     @Test
     public void getItemById_ItemExists_ReturnsItemDto() {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
-        ItemResponseDto result = itemService.getItemById(1L);
+        ItemResponseDto result = itemService.getItemById(1L, 1L);
 
         assertNotNull(result);
         assertEquals(item.getId(), result.getId());
@@ -125,6 +127,7 @@ public class ItemServiceImplTest {
 
     @Test
     public void searchItems_WithMatchingText_ReturnsItems() {
+        when(userService.getUserById(1L)).thenReturn(userDto);
         when(itemRepository.search("test")).thenReturn(List.of(item));
 
         List<ItemResponseDto> result = itemService.searchItems("test", 1L);
@@ -134,8 +137,36 @@ public class ItemServiceImplTest {
 
     @Test
     public void searchItems_EmptyText_ReturnsEmptyList() {
+        when(userService.getUserById(1L)).thenReturn(userDto);
+
         List<ItemResponseDto> result = itemService.searchItems("", 1L);
 
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void updateItem_EmptyName_DoesNotUpdateName() {
+        ItemUpdateDto updateDto = ItemUpdateDto.builder()
+                .name("")
+                .description("Updated Description")
+                .build();
+
+        when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
+        when(itemRepository.update(any(Item.class))).thenReturn(item);
+
+        assertDoesNotThrow(() -> itemService.updateItem(1L, updateDto, 1L));
+        verify(itemRepository, times(1)).update(any(Item.class));
+    }
+
+    @Test
+    public void createItem_ValidItem_ReturnsItemDto() {
+        when(userService.getUserById(1L)).thenReturn(userDto);
+        when(itemRepository.save(any(Item.class))).thenReturn(item);
+
+        ItemResponseDto result = itemService.createItem(itemDto, 1L);
+
+        assertNotNull(result);
+        assertEquals(item.getId(), result.getId());
+        verify(itemRepository, times(1)).save(any(Item.class));
     }
 }

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
@@ -46,23 +46,22 @@ public class UserServiceImplTest {
 
     @Test
     public void createUser_DuplicateEmail_ThrowsConflictException() {
-        when(userRepository.existsByEmail(anyString())).thenReturn(true);
+        // Мокируем репозиторий так, чтобы save выбрасывал исключение при дублировании email
+        when(userRepository.save(any(User.class)))
+                .thenThrow(new ConflictException("Email уже используется"));
 
-        assertThrows(ResponseStatusException.class, () -> userService.createUser(userDto));
-        verify(userRepository, times(1)).existsByEmail(anyString());
-        verify(userRepository, never()).save(any(User.class));
+        assertThrows(ConflictException.class, () -> userService.createUser(userDto));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     public void createUser_ValidUser_ReturnsUserDto() {
-        when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         UserDto result = userService.createUser(userDto);
 
         assertNotNull(result);
         assertEquals(userDto.getEmail(), result.getEmail());
-        verify(userRepository, times(1)).existsByEmail(anyString());
         verify(userRepository, times(1)).save(any(User.class));
     }
 
@@ -73,16 +72,19 @@ public class UserServiceImplTest {
                 .email("new@example.com")
                 .build();
 
+        User updatedUser = User.builder()
+                .id(1L)
+                .name("Test User")  // Имя осталось старым
+                .email("new@example.com")
+                .build();
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.existsByEmailAndIdNot("new@example.com", 1L)).thenReturn(false);
-        when(userRepository.update(any(User.class))).thenReturn(user);
+        when(userRepository.update(any(User.class))).thenReturn(updatedUser);
 
         UserDto result = userService.updateUser(1L, updateDto);
 
         assertNotNull(result);
-        // Имя должно остаться старым, так как новое пустое
-        assertEquals("Test User", result.getName());
-        // Email должен обновиться
+        assertEquals("Test User", result.getName());  // Имя не изменилось
         assertEquals("new@example.com", result.getEmail());
         verify(userRepository, times(1)).update(any(User.class));
     }
@@ -99,24 +101,29 @@ public class UserServiceImplTest {
         UserDto result = userService.updateUser(1L, updateDto);
 
         assertNotNull(result);
-        // Имя должно остаться старым, так как новое содержит только пробелы
-        assertEquals("Test User", result.getName());
+        assertEquals("Test User", result.getName());  // Имя не изменилось
         verify(userRepository, times(1)).update(any(User.class));
     }
 
     @Test
     public void updateUser_ValidName_UpdatesSuccessfully() {
+        User updatedUser = User.builder()
+                .id(1L)
+                .name("New Name")
+                .email("test@example.com")
+                .build();
+
         UserDto updateDto = UserDto.builder()
                 .name("New Name")  // Новое имя
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.update(any(User.class))).thenReturn(user);
+        when(userRepository.update(any(User.class))).thenReturn(updatedUser);
 
         UserDto result = userService.updateUser(1L, updateDto);
 
         assertNotNull(result);
-        assertEquals("New Name", result.getName());
+        assertEquals("New Name", result.getName());  // Имя изменилось
         verify(userRepository, times(1)).update(any(User.class));
     }
 
@@ -127,10 +134,11 @@ public class UserServiceImplTest {
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.existsByEmailAndIdNot("existing@example.com", 1L)).thenReturn(true);
+        when(userRepository.update(any(User.class)))
+                .thenThrow(new ConflictException("Email уже используется другим пользователем"));
 
-        assertThrows(ResponseStatusException.class, () -> userService.updateUser(1L, updateDto));
-        verify(userRepository, never()).update(any(User.class));
+        assertThrows(ConflictException.class, () -> userService.updateUser(1L, updateDto));
+        verify(userRepository, times(1)).update(any(User.class));
     }
 
     @Test
@@ -141,14 +149,43 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void updateUser_InvalidEmailFormat_ThrowsBadRequest() {
+    public void updateUser_InvalidEmailFormat_DoesNotThrowException() {
         UserDto updateDto = UserDto.builder()
-                .email("invalid-email")  // Нет @
+                .email("invalid-email")
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.update(any(User.class))).thenReturn(user);
 
-        assertThrows(ResponseStatusException.class, () -> userService.updateUser(1L, updateDto));
-        verify(userRepository, never()).update(any(User.class));
+        assertDoesNotThrow(() -> userService.updateUser(1L, updateDto));
+        verify(userRepository, times(1)).update(any(User.class));
+    }
+
+    @Test
+    public void getAllUsers_ReturnsListOfUsers() {
+        when(userRepository.findAll()).thenReturn(java.util.List.of(user));
+
+        var result = userService.getAllUsers();
+
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals("Test User", result.get(0).getName());
+    }
+
+    @Test
+    public void deleteUser_UserExists_DeletesSuccessfully() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        doNothing().when(userRepository).deleteById(1L);
+
+        assertDoesNotThrow(() -> userService.deleteUser(1L));
+        verify(userRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    public void deleteUser_UserNotFound_ThrowsNotFoundException() {
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> userService.deleteUser(1L));
+        verify(userRepository, never()).deleteById(anyLong());
     }
 }

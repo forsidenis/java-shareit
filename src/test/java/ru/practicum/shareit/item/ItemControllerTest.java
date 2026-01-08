@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ public class ItemControllerTest {
     private ItemService itemService;
 
     private ItemDto itemDto;
+    private ItemUpdateDto itemUpdateDto;
     private ItemResponseDto itemResponseDto;
 
     @BeforeEach
@@ -40,6 +42,12 @@ public class ItemControllerTest {
                 .name("Test Item")
                 .description("Test Description")
                 .available(true)
+                .build();
+
+        itemUpdateDto = ItemUpdateDto.builder()
+                .name("Updated Item")
+                .description("Updated Description")
+                .available(false)
                 .build();
 
         itemResponseDto = ItemResponseDto.builder()
@@ -67,16 +75,20 @@ public class ItemControllerTest {
     }
 
     @Test
-    public void updateItem_EmptyName_ReturnsBadRequest() throws Exception {
-        ItemDto invalidItem = ItemDto.builder()
+    public void updateItem_EmptyName_ReturnsOk() throws Exception {
+        // Теперь используем ItemUpdateDto
+        ItemUpdateDto updateDto = ItemUpdateDto.builder()
                 .name("")
+                .description("Updated Description")
                 .build();
+
+        when(itemService.updateItem(anyLong(), any(ItemUpdateDto.class), anyLong())).thenReturn(itemResponseDto);
 
         mockMvc.perform(patch("/items/1")
                         .header("X-Sharer-User-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidItem)))
-                .andExpect(status().isBadRequest());
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -100,5 +112,54 @@ public class ItemControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$.length()").value(0));
+    }
+
+    @Test
+    public void createItem_ValidItem_ReturnsCreated() throws Exception {
+        when(itemService.createItem(any(ItemDto.class), anyLong())).thenReturn(itemResponseDto);
+
+        mockMvc.perform(post("/items")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(itemDto)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Test Item"));
+    }
+
+    @Test
+    public void getItem_ValidRequest_ReturnsOk() throws Exception {
+        when(itemService.getItemById(anyLong(), anyLong())).thenReturn(itemResponseDto);
+
+        mockMvc.perform(get("/items/1")
+                        .header("X-Sharer-User-Id", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L));
+    }
+
+    @Test
+    public void updateItem_ValidRequest_ReturnsOk() throws Exception {
+        ItemUpdateDto updateDto = ItemUpdateDto.builder()
+                .name("Updated Name")
+                .description("Updated Description")
+                .available(false)
+                .build();
+
+        ItemResponseDto updatedResponseDto = ItemResponseDto.builder()
+                .id(1L)
+                .name("Updated Name")
+                .description("Updated Description")
+                .available(false)
+                .ownerId(1L)
+                .build();
+
+        when(itemService.updateItem(anyLong(), any(ItemUpdateDto.class), anyLong())).thenReturn(updatedResponseDto);
+
+        mockMvc.perform(patch("/items/1")
+                        .header("X-Sharer-User-Id", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Name"));
     }
 }

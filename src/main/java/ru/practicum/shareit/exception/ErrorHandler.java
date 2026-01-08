@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
-
 import jakarta.validation.ConstraintViolationException;
-
-import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -42,8 +39,9 @@ public class ErrorHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException e) {
         log.error("Response status exception: {} - {}", e.getStatusCode(), e.getReason());
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", e.getReason() != null ? e.getReason() : e.getStatusCode().toString());
+        Map<String, String> errorResponse = Map.of(
+                "error", e.getReason() != null ? e.getReason() : e.getStatusCode().toString()
+        );
         return ResponseEntity.status(e.getStatusCode()).body(errorResponse);
     }
 

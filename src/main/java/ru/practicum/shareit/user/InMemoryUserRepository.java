@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
@@ -14,18 +15,23 @@ public class InMemoryUserRepository implements UserRepository {
     public User save(User user) {
         if (user.getId() == null) {
             // При создании: проверяем уникальность email
-            if (existsByEmail(user.getEmail())) {
-                throw new IllegalStateException("Email уже используется");
+            if (user.getEmail() != null && existsByEmail(user.getEmail())) {
+                throw new ConflictException("Email уже используется");
             }
             user.setId(idCounter++);
         } else {
             // При обновлении: проверяем уникальность email, кроме текущего пользователя
             User existingUser = users.get(user.getId());
             if (existingUser != null) {
-                // Если email меняется и уже используется другим пользователем
-                if (!existingUser.getEmail().equals(user.getEmail()) &&
-                        existsByEmailAndIdNot(user.getEmail(), user.getId())) {
-                    throw new IllegalStateException("Email уже используется другим пользователем");
+                String oldEmail = existingUser.getEmail();
+                String newEmail = user.getEmail();
+
+                // Если новый email не null и уже используется другим пользователем
+                if (newEmail != null && existsByEmailAndIdNot(newEmail, user.getId())) {
+                    // И если старый email null или не равен новому
+                    if (oldEmail == null || !oldEmail.equals(newEmail)) {
+                        throw new ConflictException("Email уже используется другим пользователем");
+                    }
                 }
             }
         }
