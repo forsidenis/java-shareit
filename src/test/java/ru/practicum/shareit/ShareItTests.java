@@ -9,5 +9,4 @@ public class ShareItTests {
     @Test
     public void contextLoads() {
     }
-
 }

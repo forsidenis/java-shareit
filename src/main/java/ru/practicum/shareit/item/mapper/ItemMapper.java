@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.mapper;
 
+import ru.practicum.shareit.booking.dto.BookingInfoDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
@@ -8,7 +9,31 @@ import ru.practicum.shareit.user.model.User;
 
 public class ItemMapper {
 
-    public static ItemResponseDto toResponseDto(Item item) {
+    public static ItemDto toItemDto(Item item) {
+        if (item == null) {
+            return null;
+        }
+
+        ItemDto.ItemDtoBuilder builder = ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable());
+
+        if (item.getOwner() != null) {
+            builder.ownerId(item.getOwner().getId());
+        }
+
+        if (item.getRequest() != null) {
+            builder.requestId(item.getRequest().getId());
+        }
+
+        return builder.build();
+    }
+
+    public static ItemResponseDto toItemResponseDto(Item item,
+                                                    BookingInfoDto lastBooking,
+                                                    BookingInfoDto nextBooking) {
         if (item == null) {
             return null;
         }
@@ -18,7 +43,9 @@ public class ItemMapper {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .ownerId(item.getOwner() != null ? item.getOwner().getId() : null)
+                .lastBooking(lastBooking)
+                .nextBooking(nextBooking)
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
                 .build();
     }
 
@@ -27,13 +54,13 @@ public class ItemMapper {
             return null;
         }
 
-        Item item = new Item();
-        item.setId(itemDto.getId());
-        item.setName(itemDto.getName());
-        item.setDescription(itemDto.getDescription());
-        item.setAvailable(itemDto.getAvailable());
-        item.setOwner(owner);
-        return item;
+        return Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .owner(owner)
+                .build();
     }
 
     public static void updateEntity(Item item, ItemUpdateDto itemUpdateDto) {

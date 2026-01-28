@@ -46,16 +46,15 @@ public class UserServiceImplTest {
 
     @Test
     public void createUser_DuplicateEmail_ThrowsConflictException() {
-        // Мокируем репозиторий так, чтобы save выбрасывал исключение при дублировании email
-        when(userRepository.save(any(User.class)))
-                .thenThrow(new ConflictException("Email уже используется"));
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
 
         assertThrows(ConflictException.class, () -> userService.createUser(userDto));
-        verify(userRepository, times(1)).save(any(User.class));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
     public void createUser_ValidUser_ReturnsUserDto() {
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         UserDto result = userService.createUser(userDto);
@@ -72,21 +71,16 @@ public class UserServiceImplTest {
                 .email("new@example.com")
                 .build();
 
-        User updatedUser = User.builder()
-                .id(1L)
-                .name("Test User")  // Имя осталось старым
-                .email("new@example.com")
-                .build();
-
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.update(any(User.class))).thenReturn(updatedUser);
+        when(userRepository.findByEmail("new@example.com")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         UserDto result = userService.updateUser(1L, updateDto);
 
         assertNotNull(result);
         assertEquals("Test User", result.getName());  // Имя не изменилось
         assertEquals("new@example.com", result.getEmail());
-        verify(userRepository, times(1)).update(any(User.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
@@ -96,13 +90,13 @@ public class UserServiceImplTest {
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.update(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         UserDto result = userService.updateUser(1L, updateDto);
 
         assertNotNull(result);
         assertEquals("Test User", result.getName());  // Имя не изменилось
-        verify(userRepository, times(1)).update(any(User.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
@@ -118,13 +112,13 @@ public class UserServiceImplTest {
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.update(any(User.class))).thenReturn(updatedUser);
+        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
         UserDto result = userService.updateUser(1L, updateDto);
 
         assertNotNull(result);
         assertEquals("New Name", result.getName());  // Имя изменилось
-        verify(userRepository, times(1)).update(any(User.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
@@ -133,12 +127,17 @@ public class UserServiceImplTest {
                 .email("existing@example.com")
                 .build();
 
+        User anotherUser = User.builder()
+                .id(2L)
+                .name("Another User")
+                .email("existing@example.com")
+                .build();
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.update(any(User.class)))
-                .thenThrow(new ConflictException("Email уже используется другим пользователем"));
+        when(userRepository.findByEmail("existing@example.com")).thenReturn(Optional.of(anotherUser));
 
         assertThrows(ConflictException.class, () -> userService.updateUser(1L, updateDto));
-        verify(userRepository, times(1)).update(any(User.class));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -155,10 +154,11 @@ public class UserServiceImplTest {
                 .build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        when(userRepository.update(any(User.class))).thenReturn(user);
+        when(userRepository.findByEmail("invalid-email")).thenReturn(Optional.empty());
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         assertDoesNotThrow(() -> userService.updateUser(1L, updateDto));
-        verify(userRepository, times(1)).update(any(User.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class UserServiceImplTest {
 
     @Test
     public void deleteUser_UserExists_DeletesSuccessfully() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.existsById(1L)).thenReturn(true);
         doNothing().when(userRepository).deleteById(1L);
 
         assertDoesNotThrow(() -> userService.deleteUser(1L));
@@ -183,7 +183,7 @@ public class UserServiceImplTest {
 
     @Test
     public void deleteUser_UserNotFound_ThrowsNotFoundException() {
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+        when(userRepository.existsById(1L)).thenReturn(false);
 
         assertThrows(NotFoundException.class, () -> userService.deleteUser(1L));
         verify(userRepository, never()).deleteById(anyLong());

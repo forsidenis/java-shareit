@@ -55,7 +55,6 @@ public class ItemControllerTest {
                 .name("Test Item")
                 .description("Test Description")
                 .available(true)
-                .ownerId(1L)
                 .build();
     }
 
@@ -76,7 +75,6 @@ public class ItemControllerTest {
 
     @Test
     public void updateItem_EmptyName_ReturnsOk() throws Exception {
-        // Теперь используем ItemUpdateDto
         ItemUpdateDto updateDto = ItemUpdateDto.builder()
                 .name("")
                 .description("Updated Description")
@@ -150,7 +148,6 @@ public class ItemControllerTest {
                 .name("Updated Name")
                 .description("Updated Description")
                 .available(false)
-                .ownerId(1L)
                 .build();
 
         when(itemService.updateItem(anyLong(), any(ItemUpdateDto.class), anyLong())).thenReturn(updatedResponseDto);
