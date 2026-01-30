@@ -23,35 +23,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByItemIdAndBookerIdAndEndBefore(Long itemId, Long bookerId, LocalDateTime end);
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.item.owner.id = :ownerId " +
-            "ORDER BY b.start DESC")
-    List<Booking> findByOwnerId(Long ownerId, Pageable pageable);
+    List<Booking> findByItemOwnerIdOrderByStartDesc(Long ownerId, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.item.owner.id = :ownerId " +
-            "AND b.start < CURRENT_TIMESTAMP " +
-            "AND b.end > CURRENT_TIMESTAMP " +
-            "ORDER BY b.start DESC")
-    List<Booking> findCurrentByOwnerId(Long ownerId, Pageable pageable);
+    List<Booking> findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+            Long ownerId, LocalDateTime start, LocalDateTime end, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.item.owner.id = :ownerId " +
-            "AND b.end < CURRENT_TIMESTAMP " +
-            "ORDER BY b.start DESC")
-    List<Booking> findPastByOwnerId(Long ownerId, Pageable pageable);
+    List<Booking> findByItemOwnerIdAndEndBeforeOrderByStartDesc(Long ownerId, LocalDateTime end, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.item.owner.id = :ownerId " +
-            "AND b.start > CURRENT_TIMESTAMP " +
-            "ORDER BY b.start DESC")
-    List<Booking> findFutureByOwnerId(Long ownerId, Pageable pageable);
+    List<Booking> findByItemOwnerIdAndStartAfterOrderByStartDesc(Long ownerId, LocalDateTime start, Pageable pageable);
 
-    @Query("SELECT b FROM Booking b " +
-            "WHERE b.item.owner.id = :ownerId " +
-            "AND b.status = :status " +
-            "ORDER BY b.start DESC")
-    List<Booking> findByOwnerIdAndStatus(Long ownerId, BookingStatus status, Pageable pageable);
+    List<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(Long ownerId, BookingStatus status, Pageable pageable);
 
     List<Booking> findByItemIdAndBookerIdAndEndBeforeAndStatus(
             Long itemId, Long bookerId, LocalDateTime end, BookingStatus status);
@@ -68,6 +49,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findFirstByItemIdAndStartAfterAndStatusOrderByStartAsc(
             Long itemId, LocalDateTime start, BookingStatus status);
 
+    // Оставляем @Query, так как нужна фильтрация по списку ID
     @Query("SELECT b FROM Booking b " +
             "WHERE b.item.id IN :itemIds " +
             "AND b.end < :end " +
@@ -78,6 +60,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("end") LocalDateTime end,
             @Param("status") BookingStatus status);
 
+    // Оставляем @Query, так как нужна фильтрация по списку ID
     @Query("SELECT b FROM Booking b " +
             "WHERE b.item.id IN :itemIds " +
             "AND b.start > :start " +

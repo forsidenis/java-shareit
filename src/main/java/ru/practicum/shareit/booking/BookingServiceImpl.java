@@ -133,23 +133,24 @@ public class BookingServiceImpl implements BookingService {
 
         switch (bookingState) {
             case CURRENT:
-                bookings = bookingRepository.findCurrentByOwnerId(userId, pageable);
+                bookings = bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+                        userId, now, now, pageable);
                 break;
             case PAST:
-                bookings = bookingRepository.findPastByOwnerId(userId, pageable);
+                bookings = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, now, pageable);
                 break;
             case FUTURE:
-                bookings = bookingRepository.findFutureByOwnerId(userId, pageable);
+                bookings = bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(userId, now, pageable);
                 break;
             case WAITING:
-                bookings = bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.WAITING, pageable);
+                bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING, pageable);
                 break;
             case REJECTED:
-                bookings = bookingRepository.findByOwnerIdAndStatus(userId, BookingStatus.REJECTED, pageable);
+                bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED, pageable);
                 break;
             case ALL:
             default:
-                bookings = bookingRepository.findByOwnerId(userId, pageable);
+                bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(userId, pageable);
         }
 
         return bookings.stream()
