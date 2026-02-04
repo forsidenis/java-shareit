@@ -7,7 +7,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingRequestDto;
+import ru.practicum.shareit.booking.dto.BookingResponseDto;
 
 import java.time.LocalDateTime;
 
@@ -30,29 +31,30 @@ public class BookingControllerTest {
 
     @Test
     public void createBooking_ValidRequest_ReturnsOk() throws Exception {
-        BookingDto bookingDto = BookingDto.builder()
-                .id(1L)
+        BookingRequestDto bookingRequestDto = BookingRequestDto.builder()
+                .itemId(1L)
                 .start(LocalDateTime.now().plusDays(1))
                 .end(LocalDateTime.now().plusDays(2))
-                .itemId(1L)
-                .bookerId(1L)
-                .status("WAITING")
                 .build();
 
-        when(bookingService.createBooking(any(BookingDto.class), anyLong())).thenReturn(bookingDto);
+        BookingResponseDto bookingResponseDto = BookingResponseDto.builder()
+                .id(1L)
+                .build();
+
+        when(bookingService.createBooking(any(BookingRequestDto.class), anyLong())).thenReturn(bookingResponseDto);
 
         mockMvc.perform(post("/bookings")
                         .header("X-Sharer-User-Id", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(bookingDto)))
+                        .content(objectMapper.writeValueAsString(bookingRequestDto)))
                 .andExpect(status().isCreated());
     }
 
     @Test
     public void approveBooking_ValidRequest_ReturnsOk() throws Exception {
-        BookingDto bookingDto = new BookingDto();
+        BookingResponseDto bookingResponseDto = new BookingResponseDto();
 
-        when(bookingService.approveBooking(anyLong(), anyBoolean(), anyLong())).thenReturn(bookingDto);
+        when(bookingService.approveBooking(anyLong(), anyBoolean(), anyLong())).thenReturn(bookingResponseDto);
 
         mockMvc.perform(patch("/bookings/1")
                         .header("X-Sharer-User-Id", 1L)
@@ -62,9 +64,9 @@ public class BookingControllerTest {
 
     @Test
     public void getBooking_ValidRequest_ReturnsOk() throws Exception {
-        BookingDto bookingDto = new BookingDto();
+        BookingResponseDto bookingResponseDto = new BookingResponseDto();
 
-        when(bookingService.getBooking(anyLong(), anyLong())).thenReturn(bookingDto);
+        when(bookingService.getBooking(anyLong(), anyLong())).thenReturn(bookingResponseDto);
 
         mockMvc.perform(get("/bookings/1")
                         .header("X-Sharer-User-Id", 1L))

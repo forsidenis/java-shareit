@@ -2,6 +2,8 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -12,57 +14,56 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto userDto) {
+        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+            throw new ConflictException("Email already exists: " + userDto.getEmail());
+        }
         User user = UserMapper.toEntity(userDto);
         User savedUser = userRepository.save(user);
         return UserMapper.toDto(savedUser);
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Long userId, UserDto userDto) {
         User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
 
-        // Создаем нового пользователя для обновления (чтобы не менять объект из репозитория)
-        User updatedUser = new User();
-        updatedUser.setId(userId);
-        // Копируем старые данные
-        updatedUser.setName(existingUser.getName());
-        updatedUser.setEmail(existingUser.getEmail());
-
-        // Обновляем только переданные непустые поля
-        if (userDto.getName() != null && !userDto.getName().trim().isEmpty()) {
-            updatedUser.setName(userDto.getName().trim());
+        if (userDto.getEmail() != null &&
+                !userDto.getEmail().equals(existingUser.getEmail()) &&
+                userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+            throw new ConflictException("Email already exists: " + userDto.getEmail());
         }
 
-        if (userDto.getEmail() != null && !userDto.getEmail().trim().isEmpty()) {
-            String newEmail = userDto.getEmail().trim();
-
-            // Валидация формата email через аннотации в DTO
-            // Проверка уникальности будет в репозитории
-            updatedUser.setEmail(newEmail);
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
+            existingUser.setName(userDto.getName());
+        }
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
+            existingUser.setEmail(userDto.getEmail());
         }
 
-        // Обновляем пользователя в репозитории
-        User savedUser = userRepository.update(updatedUser);
-        return UserMapper.toDto(savedUser);
+        User updatedUser = userRepository.save(existingUser);
+        return UserMapper.toDto(updatedUser);
     }
 
     @Override
     public UserDto getUserById(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с ID " + userId + " не найден"));
+                .orElseThrow(() -> new NotFoundException("User not found with id: " + userId));
         return UserMapper.toDto(user);
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
-        if (!userRepository.findById(userId).isPresent()) {
-            throw new NotFoundException("Пользователь с ID " + userId + " не найдена");
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException("User not found with id: " + userId);
         }
         userRepository.deleteById(userId);
     }
