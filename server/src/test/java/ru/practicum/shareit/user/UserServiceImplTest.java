@@ -11,6 +11,7 @@ import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +43,17 @@ public class UserServiceImplTest {
                 .name("Test User")
                 .email("test@example.com")
                 .build();
+    }
+
+    @Test
+    public void getUserById_UserExists_ReturnsUserDto() {
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserDto result = userService.getUserById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("Test User", result.getName());
     }
 
     @Test
