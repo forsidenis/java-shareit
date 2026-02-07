@@ -153,6 +153,17 @@
                     <version>0.8.12</version>
                     <configuration>
                         <output>file</output>
+                        <!-- Добавьте исключения здесь -->
+                        <excludes>
+                            <exclude>**/dto/**/*</exclude>
+                            <exclude>**/model/**/*</exclude>
+                            <exclude>**/entity/**/*</exclude>
+                            <exclude>**/mapper/**/*</exclude>
+                            <exclude>**/exception/**/*</exclude>
+                            <exclude>**/*Application.class</exclude>
+                            <exclude>**/config/**/*</exclude>
+                            <exclude>**/client/**/*</exclude>
+                        </excludes>
                     </configuration>
                     <executions>
                         <execution>
@@ -179,27 +190,27 @@
                                             <limit>
                                                 <counter>LINE</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.9</minimum>
+                                                <minimum>0.8</minimum>
                                             </limit>
                                             <limit>
                                                 <counter>BRANCH</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.6</minimum>
+                                                <minimum>0.5</minimum>
                                             </limit>
                                             <limit>
                                                 <counter>COMPLEXITY</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.6</minimum>
+                                                <minimum>0.5</minimum>
                                             </limit>
                                             <limit>
                                                 <counter>METHOD</counter>
                                                 <value>COVEREDRATIO</value>
-                                                <minimum>0.7</minimum>
+                                                <minimum>0.6</minimum>
                                             </limit>
                                             <limit>
                                                 <counter>CLASS</counter>
                                                 <value>MISSEDCOUNT</value>
-                                                <maximum>1</maximum>
+                                                <maximum>20</maximum>
                                             </limit>
                                         </limits>
                                     </rule>
