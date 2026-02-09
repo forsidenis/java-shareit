@@ -41,7 +41,7 @@ public class ItemRequestServiceImplTest {
     private ItemRequestDto itemRequestDto;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         user = User.builder()
                 .id(1L)
                 .name("Test User")
@@ -64,7 +64,7 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
-    void createRequest_ValidRequest_ReturnsItemRequestDto() {
+    public void createRequest_ValidRequest_ReturnsItemRequestDto() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(itemRequestRepository.save(any(ItemRequest.class))).thenReturn(itemRequest);
 
@@ -76,7 +76,7 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
-    void createRequest_UserNotFound_ThrowsNotFoundException() {
+    public void createRequest_UserNotFound_ThrowsNotFoundException() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () ->
@@ -84,7 +84,7 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getUserRequests_ValidUser_ReturnsRequests() {
+    public void getUserRequests_ValidUser_ReturnsRequests() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(itemRequestRepository.findByRequestorIdOrderByCreatedDesc(1L))
                 .thenReturn(List.of(itemRequest));
@@ -97,7 +97,7 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getAllRequests_ValidRequest_ReturnsRequests() {
+    public void getAllRequests_ValidRequest_ReturnsRequests() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(itemRequestRepository.findAllByRequestorIdNot(eq(1L), any(Pageable.class)))
                 .thenReturn(List.of(itemRequest));
@@ -109,7 +109,7 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getRequestById_ValidRequest_ReturnsRequestDto() {
+    public void getRequestById_ValidRequest_ReturnsRequestDto() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(itemRequestRepository.findById(1L)).thenReturn(Optional.of(itemRequest));
 
@@ -121,7 +121,7 @@ public class ItemRequestServiceImplTest {
     }
 
     @Test
-    void getRequestById_RequestNotFound_ThrowsNotFoundException() {
+    public void getRequestById_RequestNotFound_ThrowsNotFoundException() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(itemRequestRepository.findById(99L)).thenReturn(Optional.empty());
 

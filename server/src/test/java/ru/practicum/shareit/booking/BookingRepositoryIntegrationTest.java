@@ -28,7 +28,7 @@ public class BookingRepositoryIntegrationTest {
     private ru.practicum.shareit.item.ItemRepository itemRepository;
 
     @Test
-    void findByBookerIdOrderByStartDesc_ShouldReturnBookings() {
+    public void findByBookerIdOrderByStartDesc_ShouldReturnBookings() {
         User user = userRepository.save(User.builder()
                 .name("Test User")
                 .email("test@example.com")
@@ -64,6 +64,6 @@ public class BookingRepositoryIntegrationTest {
     }
 
     @Test
-    void findByItemOwnerIdOrderByStartDesc_ShouldReturnBookings() {
+    public void findByItemOwnerIdOrderByStartDesc_ShouldReturnBookings() {
     }
 }

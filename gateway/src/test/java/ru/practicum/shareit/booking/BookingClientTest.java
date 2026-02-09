@@ -26,7 +26,7 @@ public class BookingClientTest {
     private ObjectMapper objectMapper;
 
     @Test
-    void getBookings_ShouldMakeCorrectRequest() throws Exception {
+    public void getBookings_ShouldMakeCorrectRequest() throws Exception {
         String expectedResponse = "[{\"id\":1,\"status\":\"WAITING\"}]";
         server.expect(requestTo("http://localhost:9090/bookings?state=ALL&from=0&size=10"))
                 .andExpect(method(HttpMethod.GET))

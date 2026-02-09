@@ -44,7 +44,7 @@ public class BookingControllerIntegrationTest {
     private Long itemId;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         // Создаем пользователей
         UserDto ownerDto = UserDto.builder()
                 .name("Owner")
@@ -71,7 +71,7 @@ public class BookingControllerIntegrationTest {
     }
 
     @Test
-    void createBooking_ValidBooking_ReturnsCreated() throws Exception {
+    public void createBooking_ValidBooking_ReturnsCreated() throws Exception {
         BookingRequestDto bookingRequestDto = BookingRequestDto.builder()
                 .itemId(itemId)
                 .start(LocalDateTime.now().plusDays(1))
@@ -88,7 +88,7 @@ public class BookingControllerIntegrationTest {
     }
 
     @Test
-    void getBooking_ValidRequest_ReturnsBooking() throws Exception {
+    public void getBooking_ValidRequest_ReturnsBooking() throws Exception {
         // Сначала создаем бронирование
         BookingRequestDto bookingRequestDto = BookingRequestDto.builder()
                 .itemId(itemId)
@@ -113,7 +113,7 @@ public class BookingControllerIntegrationTest {
     }
 
     @Test
-    void approveBooking_ValidRequest_ReturnsOk() throws Exception {
+    public void approveBooking_ValidRequest_ReturnsOk() throws Exception {
         // Создаем бронирование
         BookingRequestDto bookingRequestDto = BookingRequestDto.builder()
                 .itemId(itemId)
@@ -139,7 +139,7 @@ public class BookingControllerIntegrationTest {
     }
 
     @Test
-    void getAllBookings_ValidRequest_ReturnsOk() throws Exception {
+    public void getAllBookings_ValidRequest_ReturnsOk() throws Exception {
         mockMvc.perform(get("/bookings")
                         .header("X-Sharer-User-Id", bookerId)
                         .param("state", "ALL")
@@ -150,7 +150,7 @@ public class BookingControllerIntegrationTest {
     }
 
     @Test
-    void getOwnerBookings_ValidRequest_ReturnsOk() throws Exception {
+    public void getOwnerBookings_ValidRequest_ReturnsOk() throws Exception {
         mockMvc.perform(get("/bookings/owner")
                         .header("X-Sharer-User-Id", ownerId)
                         .param("state", "ALL")

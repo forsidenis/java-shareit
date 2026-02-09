@@ -46,7 +46,7 @@ public class BookingServiceImplTest {
     private BookingRequestDto bookingRequestDto;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         owner = User.builder()
                 .id(1L)
                 .name("Owner")
@@ -84,7 +84,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_ValidBooking_ReturnsBookingResponseDto() {
+    public void createBooking_ValidBooking_ReturnsBookingResponseDto() {
         when(userRepository.findById(2L)).thenReturn(Optional.of(booker));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(bookingRepository.findByItemIdAndStatusNot(eq(1L), any())).thenReturn(List.of());
@@ -98,7 +98,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_ItemNotAvailable_ThrowsValidationException() {
+    public void createBooking_ItemNotAvailable_ThrowsValidationException() {
         item.setAvailable(false);
         when(userRepository.findById(2L)).thenReturn(Optional.of(booker));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
@@ -108,7 +108,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_OwnerBooksOwnItem_ThrowsNotFoundException() {
+    public void createBooking_OwnerBooksOwnItem_ThrowsNotFoundException() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
 
@@ -117,7 +117,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void approveBooking_ValidRequest_ReturnsUpdatedBooking() {
+    public void approveBooking_ValidRequest_ReturnsUpdatedBooking() {
         when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
         when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
 
@@ -128,7 +128,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getBooking_ValidRequest_ReturnsBooking() {
+    public void getBooking_ValidRequest_ReturnsBooking() {
         when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
 
         BookingResponseDto result = bookingService.getBooking(1L, 2L);
@@ -138,7 +138,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getAllBookings_AllState_ReturnsBookings() {
+    public void getAllBookings_AllState_ReturnsBookings() {
         when(userRepository.findById(2L)).thenReturn(Optional.of(booker));
         when(bookingRepository.findByBookerIdOrderByStartDesc(eq(2L), any(Pageable.class)))
                 .thenReturn(List.of(booking));
@@ -150,7 +150,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void getOwnerBookings_AllState_ReturnsBookings() {
+    public void getOwnerBookings_AllState_ReturnsBookings() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(owner));
         when(bookingRepository.findByItemOwnerIdOrderByStartDesc(eq(1L), any(Pageable.class)))
                 .thenReturn(List.of(booking));
@@ -162,7 +162,7 @@ public class BookingServiceImplTest {
     }
 
     @Test
-    void createBooking_InvalidDates_ThrowsValidationException() {
+    public void createBooking_InvalidDates_ThrowsValidationException() {
         bookingRequestDto.setEnd(LocalDateTime.now().minusDays(1));
 
         when(userRepository.findById(2L)).thenReturn(Optional.of(booker));

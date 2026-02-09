@@ -23,7 +23,7 @@ public class ItemRepositoryTest {
     private ItemRepository itemRepository;
 
     @Test
-    void searchAvailableItems_ValidText_ReturnsItems() {
+    public void searchAvailableItems_ValidText_ReturnsItems() {
         User owner = User.builder()
                 .name("Owner")
                 .email("owner@example.com")
@@ -58,6 +58,6 @@ public class ItemRepositoryTest {
     }
 
     @Test
-    void findByOwnerId_ValidOwner_ReturnsItems() {
+    public void findByOwnerId_ValidOwner_ReturnsItems() {
     }
 }

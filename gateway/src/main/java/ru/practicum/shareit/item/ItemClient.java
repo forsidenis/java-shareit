@@ -17,12 +17,11 @@ public class ItemClient extends BaseClient {
     private static final String API_PREFIX = "/items";
 
     public ItemClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory.class)
-                        .build()
-        );
+        super(builder.uriTemplateHandler(new DefaultUriBuilderFactory
+        (serverUrl + API_PREFIX))
+                .requestFactory
+        (HttpComponentsClientHttpRequestFactory.class)
+                .build());
     }
 
     public ResponseEntity<Object> createItem(long userId, ItemDto itemDto) {

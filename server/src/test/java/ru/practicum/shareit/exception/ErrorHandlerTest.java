@@ -14,7 +14,7 @@ public class ErrorHandlerTest {
     private final ErrorHandler errorHandler = new ErrorHandler();
 
     @Test
-    void handleNotFoundException_ShouldReturnNotFound() {
+    public void handleNotFoundException_ShouldReturnNotFound() {
         NotFoundException exception = new NotFoundException("Not found");
 
         Map<String, String> result = errorHandler.handleNotFoundException(exception);
@@ -24,7 +24,7 @@ public class ErrorHandlerTest {
     }
 
     @Test
-    void handleValidationException_ShouldReturnBadRequest() {
+    public void handleValidationException_ShouldReturnBadRequest() {
         ValidationException exception = new ValidationException("Validation failed");
 
         Map<String, String> result = errorHandler.handleValidationException(exception);
@@ -34,7 +34,7 @@ public class ErrorHandlerTest {
     }
 
     @Test
-    void handleResponseStatusException_ShouldReturnProperResponse() {
+    public void handleResponseStatusException_ShouldReturnProperResponse() {
         ResponseStatusException exception = new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad request");
 
         ResponseEntity<Map<String, String>> result = errorHandler.handleResponseStatusException(exception);

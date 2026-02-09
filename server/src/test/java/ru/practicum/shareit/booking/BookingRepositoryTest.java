@@ -24,7 +24,7 @@ public class BookingRepositoryTest {
     private BookingRepository bookingRepository;
 
     @Test
-    void findByBookerIdOrderByStartDesc_ValidBooker_ReturnsBookings() {
+    public void findByBookerIdOrderByStartDesc_ValidBooker_ReturnsBookings() {
         User owner = User.builder()
                 .name("Owner")
                 .email("owner@example.com")
@@ -67,6 +67,6 @@ public class BookingRepositoryTest {
     }
 
     @Test
-    void findByItemIdAndBookerIdAndEndBefore_ValidParameters_ReturnsBookings() {
+    public void findByItemIdAndBookerIdAndEndBefore_ValidParameters_ReturnsBookings() {
     }
 }

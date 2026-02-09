@@ -16,12 +16,11 @@ public class ItemRequestClient extends BaseClient {
     private static final String API_PREFIX = "/requests";
 
     public ItemRequestClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory.class)
-                        .build()
-        );
+        super(builder.uriTemplateHandler(new DefaultUriBuilderFactory
+        (serverUrl + API_PREFIX))
+                .requestFactory
+        (HttpComponentsClientHttpRequestFactory.class)
+                .build());
     }
 
     public ResponseEntity<Object> createRequest(long userId, ItemRequestDto itemRequestDto) {

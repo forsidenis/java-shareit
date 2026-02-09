@@ -19,12 +19,11 @@ public class BookingClient extends BaseClient {
     private static final String API_PREFIX = "/bookings";
 
     public BookingClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
-        super(
-                builder
-                        .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory.class)
-                        .build()
-        );
+        super(builder.uriTemplateHandler(new DefaultUriBuilderFactory
+        (serverUrl + API_PREFIX))
+                .requestFactory
+        (HttpComponentsClientHttpRequestFactory.class)
+                .build());
     }
 
     public ResponseEntity<Object> getBookings(long userId, BookingState state, Integer from, Integer size) {

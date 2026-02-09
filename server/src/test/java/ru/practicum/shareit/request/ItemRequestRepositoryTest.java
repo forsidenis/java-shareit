@@ -24,7 +24,7 @@ public class ItemRequestRepositoryTest {
     private ru.practicum.shareit.user.UserRepository userRepository;
 
     @Test
-    void findByRequestorIdOrderByCreatedDesc_ShouldReturnRequests() {
+    public void findByRequestorIdOrderByCreatedDesc_ShouldReturnRequests() {
         User user = userRepository.save(User.builder()
                 .name("Test User")
                 .email("test@example.com")
@@ -45,7 +45,7 @@ public class ItemRequestRepositoryTest {
     }
 
     @Test
-    void findAllByRequestorIdNot_ShouldReturnOtherUsersRequests() {
+    public void findAllByRequestorIdNot_ShouldReturnOtherUsersRequests() {
         User user1 = userRepository.save(User.builder()
                 .name("User 1")
                 .email("user1@example.com")
